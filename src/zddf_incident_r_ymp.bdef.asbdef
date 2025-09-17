@@ -1,0 +1,114 @@
+managed implementation in class zbp_ddf_incident_r_ymp unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZDDF_INCIDENT_R_YMP alias Incident
+persistent table zdt_inct_a_ymp
+draft table zdt_inct_d_ymp
+lock master
+total etag LastChangedAt
+etag master LocalLastChangedAt
+
+authorization master ( global, instance )
+{
+  create;
+  update;
+  delete;
+
+  association _History { create ( features : instance ); with draft; }//
+  field ( numbering : managed, readonly ) IncUuid;
+  field ( mandatory ) Title, Description, Priority;
+  field ( readonly ) IncidentId, Status,LocalCreatedBy, LocalCreatedAt;
+  field ( readonly ) LocalLastChangedBy,LocalLastChangedAt,LastChangedAt,CreationDate,ChangedDate;
+
+
+
+  validation ValidateStatus on save { create; field Status; }
+  validation ValidatePriority on save { create; field Priority; }
+  validation ValidateDates on save { create; field CreationDate, ChangedDate; }
+
+  determination SetInitialValues on modify { create; }
+  determination CreateHistoryEntry on save { create; }
+
+  determine action ValidatePriorityId { validation ValidatePriority; }
+  determine action ValidateStatusId { validation ValidateStatus; }
+
+  action ( features : instance, authorization : update ) changeStatus result [1] $self;
+  side effects { action changeStatus affects $self; }
+  internal action setHistory;
+
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Edit;
+  draft action Resume;
+  draft determine action Prepare
+  {
+    validation ValidateStatus;
+    validation ValidatePriority;
+    validation ValidateDates;
+  }
+
+  mapping for zdt_inct_a_ymp
+    {
+      IncUuid            = inc_uuid;
+      IncidentId         = incident_id;
+      Title              = title;
+      Description        = description;
+      Status             = status;
+      Priority           = priority;
+      CreationDate       = creation_date;
+      LocalLastChangedBy = local_last_changed_by;
+      LocalLastChangedAt = local_last_changed_at;
+      ChangedDate        = changed_date;
+      LocalCreatedBy     = local_created_by;
+      LocalCreatedAt     = local_created_at;
+      LastChangeDat      = last_changed_at;
+    }
+
+
+
+}
+
+
+
+define behavior for ZDDF_INCIDENT_HIS_YMP alias History
+implementation in class zbp_ddf_incident_h_ymp unique
+persistent table zdt_inct_h_ymp
+draft table zdt_inct_h_d_ymp
+lock dependent by _Incident
+authorization dependent by _Incident
+etag master local_last_changed_at
+{
+  update;
+  delete;
+
+  association _Incident { with draft; }
+  //association _Incident;
+
+  field ( numbering : managed )
+  HisUUID;
+
+  field ( readonly )
+  HisUUID,
+  IncUUID,
+  local_created_by,
+  local_created_at,
+  local_last_changed_by,
+  local_last_changed_at,
+  last_changed_at;
+
+  mapping for zdt_inct_h_ymp
+    {
+      HisUuid               = his_uuid;
+      IncUuid               = inc_uuid;
+      HisId                 = his_id;
+      PreviousStatus        = previous_status;
+      NewStatus             = new_status;
+      Text                  = text;
+      local_created_by      = local_created_by;
+      local_created_at      = local_created_at;
+      local_last_changed_by = local_last_changed_by;
+      local_last_changed_at = local_last_changed_at;
+      last_changed_at       = last_changed_at;
+    }
+}

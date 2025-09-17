@@ -24,10 +24,10 @@ define root view entity ZDDF_INCIDENT_C_YMP
       Status,
       _Status.status_description,
       
-      /* Elemento virtual para la edad del ticket */
+      /* Elemento virtual para la edad del ticket
       @EndUserText.label: 'Egae Incident'     
       @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_AGE_CALCULATOR_YP'
-      virtual IncidentAge: abap.int4, 
+      virtual IncidentAge: abap.int4,  */
       
       @Search.defaultSearchElement: true
       @Search.fuzzinessThreshold: 0.8  
@@ -35,6 +35,7 @@ define root view entity ZDDF_INCIDENT_C_YMP
       @ObjectModel.text.element: [ 'priority_description' ]
       Priority,
       _Priority.priority_description,
+      
       CreationDate,
       ChangedDate,
    
@@ -43,8 +44,11 @@ define root view entity ZDDF_INCIDENT_C_YMP
       @Semantics.systemDateTime.lastChangedAt: true
       LastChangedAt,
       /* Associations */
-      _History,
+     
       _Priority,
       _Status
+      
+       //@ObjectModel.association.type: [#TO_COMPOSITION_CHILD]
+      //_History //: redirected to composition child ZDDF_INCIDENT_HIS_C_YMP
 
 }

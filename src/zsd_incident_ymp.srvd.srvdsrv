@@ -1,0 +1,4 @@
+@EndUserText.label: 'Service Definition Incident'
+define service ZSD_INCIDENT_YMP {
+  expose ZDDF_INCIDENT_C_YMP as Incident;
+}

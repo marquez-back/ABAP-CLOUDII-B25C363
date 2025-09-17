@@ -17,5 +17,5 @@ define view entity ZDDF_INCIDENT_HIS_C_YMP
       local_last_changed_at,
       last_changed_at,
       /* Associations */
-      _Incident : redirected to parent ZDDF_INCIDENT_C_YMP
+      _Incident /*: redirected to parent ZDDF_INCIDENT_C_YMP*/
 }

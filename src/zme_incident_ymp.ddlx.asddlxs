@@ -1,4 +1,4 @@
-@Metadata.layer: #CUSTOMER
+ @Metadata.layer: #CUSTOMER
 
 @UI: { headerInfo: {    typeName: 'Incident',
                         typeNamePlural: 'Incidents',
@@ -12,7 +12,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
   @UI.facet: [{   id: 'IncidentMasterData',
                   purpose: #STANDARD,
                   type: #IDENTIFICATION_REFERENCE,
-                  label: 'Incidenta Master data',
+                  label: 'Incident Master data',
                   position:  10 }]
   @UI.hidden: true
   IncUuid;
@@ -24,49 +24,93 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                                dataAction: 'changueStatus',
                                label: 'Changue Status',
                                position: 10},
-                               
+
                             {  type: #FOR_ACTION,
                                dataAction: 'create',
                                label: 'Create',
                                position: 20},
-                               
+
                             {  type: #FOR_ACTION,
                                dataAction: 'delete',
                                label: 'Delete',
                                position: 30}],
                                
+
                                selectionField: [{ position: 10 }],
-                               identification: [{ position: 10 },
+                               identification: [{ position: 10,
+                                                    label: 'Incident ID'},
+                               
                                                    {  type: #FOR_ACTION,
                                                        dataAction: 'changueStatus',
                                                        label: 'Changue Status',
                                                        position: 10},
-                                                       
+
                                                     {  type: #FOR_ACTION,
                                                        dataAction: 'create',
                                                        label: 'Create',
                                                        position: 20},
-                                                       
+
                                                     {  type: #FOR_ACTION,
                                                        dataAction: 'delete',
                                                        label: 'Delete',
-                                                       position: 30}]
+                                                       position: 30}],
+                                                       // Acciones a nivel de línea
+                                                    dataPoint: {
+                                                      title: 'Incident ID'
+                                                    }
 
   }
 
   IncidentId;
-  
-  @UI: {lineItem: [{ position: 30,
-               importance: #LOW }],
-  identification: [{ position: 30  } ] }
-//  selectionField: [{ position: 30 }]
-//  @UI.hidden: true
+
+  /*@UI: {lineItem: [{ position: 30,
+               importance: #LOW ,
+               label: 'Title'}],
+  identification: [{ position: 30  } ] }*/
+  //  selectionField: [{ position: 30 }]
+  //  @UI.hidden: true
+  //Title - Campo obligatorio
+  @UI: {
+    lineItem: [{
+      position: 20,
+      importance: #HIGH,
+      label: 'Title'
+    }],
+    identification: [{
+      position: 20,
+      label: 'Title'
+    }],
+    // Para formulario de creación
+    fieldGroup: [{
+      qualifier: 'GeneralData',
+      position: 10,
+      label: 'General Data'
+    }]
+  }
   Title;
 
-  @UI: {lineItem: [{ position: 40,
+  /*@UI: {lineItem: [{ position: 40,
                importance: #LOW }],
   identification: [{ position: 40  } ],
-  selectionField: [{ position: 40 }]}
+  selectionField: [{ position: 40 }]}*/
+
+  // Description - Campo obligatorio
+  @UI: {
+    lineItem: [{
+      position: 30,
+      importance: #HIGH,
+      label: 'Description'
+    }],
+    identification: [{
+      position: 30,
+      label: 'Description'
+    }],
+    fieldGroup: [{
+      qualifier: 'GeneralData',
+      position: 20,
+      label: 'Description'
+    }]
+  }
   Description;
 
   @Consumption.valueHelpDefinition: [ {
@@ -91,33 +135,50 @@ annotate entity ZDDF_INCIDENT_C_YMP with
   selectionField: [{ position: 60 }]}
   Priority;
 
-  @UI: {lineItem: [{ position: 70,
+  /*@UI: {lineItem: [{ position: 70,
                importance: #LOW }],
   identification: [{ position: 70  } ],
-  selectionField: [{ position: 70 }]}
+  selectionField: [{ position: 70 }]}*/
+  // Creation Date - Solo lectura
+  @UI: {
+    lineItem: [{
+      position: 60,
+      importance: #MEDIUM,
+      label: 'Creation Date'
+    }],
+    identification: [{
+      position: 60,
+      label: 'Creation Date'
+    }]
+  }
   CreationDate;
 
-  @UI: {lineItem: [{ position: 80,
-               importance: #LOW }],
-  identification: [{ position: 80  } ],
-  selectionField: [{ position: 80 }]}
-  ChangedDate;  
+  /* @UI: {lineItem: [{ position: 80,
+                importance: #LOW }],
+   identification: [{ position: 80  } ],
+   selectionField: [{ position: 80 }]}*/
+  // Changed Date - Solo lectura
+  @UI: {
+    lineItem: [{
+      position: 70,
+      importance: #MEDIUM,
+      label: 'Changed Date'
+    }],
+    identification: [{
+      position: 70,
+      label: 'Changed Date'
+    }]
+  }
+  ChangedDate;
 
-  @UI: {lineItem: [{ position: 120,
-               importance: #LOW }],
-  identification: [{ position: 120  } ],
-  selectionField: [{ position: 120 }]}
+
   @UI.hidden: true
   LocalLastChangedAt;
 
-  @UI: {lineItem: [{ position: 130,
-               importance: #LOW }],
-  identification: [{ position: 130  } ],
-  selectionField: [{ position: 130 }]}
   @UI.hidden: true
   LastChangedAt;
- 
-   @UI.hidden: true 
-  _History;
+
+  @UI.hidden: true
+  _history;
 
 }

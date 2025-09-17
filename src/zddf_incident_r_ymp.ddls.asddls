@@ -10,7 +10,7 @@
 define root view entity ZDDF_INCIDENT_R_YMP
   as select from zdt_inct_a_ymp
 
-  association [0..*] to ZDDF_INCIDENT_HIS_YMP as _History on $projection.IncUuid = _History.IncUUID
+  composition [0..*] of ZDDF_INCIDENT_HIS_YMP as _History    
   association [0..1] to zdt_status_ymp        as _Status   on $projection.Status = _Status.status_code
   association [0..1] to zdt_priority_ymp      as _Priority on $projection.Priority = _Priority.priority_code
 {
@@ -34,8 +34,10 @@ define root view entity ZDDF_INCIDENT_R_YMP
       //Totoal Etag
       @Semantics.systemDateTime.lastChangedAt: true
       last_changed_at       as LastChangedAt,
+      
+      _History,
       _Status,
-      _Priority,
-      _History
+      _Priority
+      
     
 }

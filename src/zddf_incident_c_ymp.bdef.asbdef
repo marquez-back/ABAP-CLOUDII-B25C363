@@ -1,0 +1,22 @@
+projection;
+strict ( 2 );
+use draft;
+
+define behavior for ZDDF_INCIDENT_C_YMP alias Incident
+{
+  use create;
+  use update;
+  use delete;
+
+  //use association _History;// { with draft; }
+  use action ValidatePriorityId;
+  use action ValidateStatusId;
+  use action changeStatus;
+
+  use action Activate;
+  use action Discard;
+  use action Edit;
+  use action Resume;
+  use action Prepare;
+
+}
