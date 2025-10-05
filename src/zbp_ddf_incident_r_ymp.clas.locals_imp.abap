@@ -1,14 +1,14 @@
 CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PUBLIC SECTION.
 
-    CONSTANTS: BEGIN OF mc_status,
+    CONSTANTS: BEGIN OF inc_status,
                  open        TYPE zde_status_code VALUE 'OP',
                  in_progress TYPE zde_status_code VALUE 'IP',
                  pending     TYPE zde_status_code VALUE 'PE',
                  completed   TYPE zde_status_code VALUE 'CO',
                  closed      TYPE zde_status_code VALUE 'CL',
                  canceled    TYPE zde_status_code VALUE 'CN',
-               END OF mc_status.
+               END OF inc_status.
   PRIVATE SECTION.
 
     METHODS get_instance_features FOR INSTANCE FEATURES
@@ -57,37 +57,7 @@ CLASS lhc_Incident IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD changeStatus.
-    " Acción para cambiar el estado de un incidente
-    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-      ENTITY Incident
-        FIELDS ( Status )
-        WITH CORRESPONDING #( keys )
-      RESULT DATA(incidents).
 
-    " Declarar variables de respuesta
-    DATA: reported_response TYPE RESPONSE FOR REPORTED zddf_incident_r_ymp,
-          failed_response   TYPE RESPONSE FOR FAILED zddf_incident_r_ymp.
-
-    " Actualizar el estado
-    MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-      ENTITY Incident
-        UPDATE FIELDS ( Status )
-        WITH VALUE #( FOR key IN keys
-                      ( %tky   = key-%tky
-                        Status = 'IP' ) )
-      REPORTED reported_response
-      FAILED failed_response.
-
-    " Leer y devolver los incidentes actualizados
-    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-      ENTITY Incident
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(updated_incidents).
-
-    " Asignar al resultado - forma correcta
-    result = VALUE #( FOR incident IN updated_incidents
-                      ( %tky   = incident-%tky
-                        %param = incident ) ).
   ENDMETHOD.
 
   METHOD setHistory.
@@ -129,7 +99,7 @@ CLASS lhc_Incident IMPLEMENTATION.
       WITH VALUE #(  FOR incident IN incidents ( %tky = incident-%tky
                                                  IncidentId = lv_max_inct_id
                                                  CreationDate = cl_abap_context_info=>get_system_date( )
-                                                 Status       = mc_status-open )  ).
+                                                 Status       = inc_status-open )  ).
 
     ENDMETHOD.
 

@@ -17,8 +17,8 @@ authorization master ( global, instance )
 
   association _History { create ( features : instance ); with draft; }//
   field ( numbering : managed, readonly ) IncUuid;
-  field ( mandatory ) Title, Description, Priority;
-  field ( readonly ) IncidentId, Status,LocalCreatedBy, LocalCreatedAt;
+  field ( mandatory ) Title, Description, Status,Priority;
+  field ( readonly ) IncidentId, LocalCreatedBy, LocalCreatedAt;
   field ( readonly ) LocalLastChangedBy,LocalLastChangedAt,LastChangedAt,CreationDate,ChangedDate;
 
 
@@ -33,8 +33,9 @@ authorization master ( global, instance )
   determine action ValidatePriorityId { validation ValidatePriority; }
   determine action ValidateStatusId { validation ValidateStatus; }
 
-  action ( features : instance, authorization : update ) changeStatus result [1] $self;
-  side effects { action changeStatus affects $self; }
+  action ( features : instance, authorization : update ) changeStatus    result [1] $self;
+  side effects { action changeStatus affects  $self; }
+  //side effects {action changeStatus affects Status;}
   internal action setHistory;
 
   draft action Activate optimized;

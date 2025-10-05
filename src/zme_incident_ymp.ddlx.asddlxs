@@ -20,10 +20,11 @@ annotate entity ZDDF_INCIDENT_C_YMP with
   @UI: {    lineItem: [{    position: 10,
                             importance: #MEDIUM,
                             label: 'Incident ID' },
+                            
                             {  type: #FOR_ACTION,
                                dataAction: 'changueStatus',
                                label: 'Changue Status',
-                               position: 10},
+                               position: 10}/*,
 
                             {  type: #FOR_ACTION,
                                dataAction: 'create',
@@ -33,7 +34,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                             {  type: #FOR_ACTION,
                                dataAction: 'delete',
                                label: 'Delete',
-                               position: 30}],
+                               position: 30}*/],
                                
 
                                selectionField: [{ position: 10 }],
@@ -43,7 +44,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                                                    {  type: #FOR_ACTION,
                                                        dataAction: 'changueStatus',
                                                        label: 'Changue Status',
-                                                       position: 10},
+                                                       position: 10}/*,
 
                                                     {  type: #FOR_ACTION,
                                                        dataAction: 'create',
@@ -53,7 +54,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                                                     {  type: #FOR_ACTION,
                                                        dataAction: 'delete',
                                                        label: 'Delete',
-                                                       position: 30}],
+                                                       position:30}*/],
                                                        // Acciones a nivel de línea
                                                     dataPoint: {
                                                       title: 'Incident ID'

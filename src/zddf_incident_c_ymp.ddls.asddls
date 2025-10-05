@@ -17,6 +17,8 @@ define root view entity ZDDF_INCIDENT_C_YMP
       @Search.ranking: #MEDIUM    
       Title,
       Description,
+      
+      
       @Search.defaultSearchElement: true
       @Search.fuzzinessThreshold: 0.8  
       @Search.ranking: #MEDIUM   
