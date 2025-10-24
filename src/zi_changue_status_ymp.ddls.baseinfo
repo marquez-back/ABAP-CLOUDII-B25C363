@@ -2,9 +2,7 @@
 "BASEINFO":
 {
 "FROM":
-[
-"ZDDF_STATUS_YMP"
-],
+[],
 "ASSOCIATED":
 [],
 "BASE":

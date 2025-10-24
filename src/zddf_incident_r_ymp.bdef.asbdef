@@ -17,8 +17,8 @@ authorization master ( global, instance )
 
   association _History { create ( features : instance ); with draft; }//
   field ( numbering : managed, readonly ) IncUuid;
-  field ( mandatory ) Title, Description, Status,Priority;
-  field ( readonly ) IncidentId, LocalCreatedBy, LocalCreatedAt;
+  field ( mandatory ) Title, Description,Priority;
+  field ( readonly ) IncidentId, LocalCreatedBy, LocalCreatedAt, Status;
   field ( readonly ) LocalLastChangedBy,LocalLastChangedAt,LastChangedAt,CreationDate,ChangedDate;
 
 
@@ -33,9 +33,10 @@ authorization master ( global, instance )
   determine action ValidatePriorityId { validation ValidatePriority; }
   determine action ValidateStatusId { validation ValidateStatus; }
 
-  action ( features : instance, authorization : update ) changeStatus    result [1] $self;
-  side effects { action changeStatus affects  $self; }
-  //side effects {action changeStatus affects Status;}
+  action changeStatus  parameter ZI_CHANGUE_STATUS_YMP  result [1] $self;
+
+  //side effects { action changeStatus affects $self, entity _History; }
+  side effects {action changeStatus affects  $self;}
   internal action setHistory;
 
   draft action Activate optimized;
@@ -51,6 +52,7 @@ authorization master ( global, instance )
 
   mapping for zdt_inct_a_ymp
     {
+
       IncUuid            = inc_uuid;
       IncidentId         = incident_id;
       Title              = title;
@@ -63,7 +65,7 @@ authorization master ( global, instance )
       ChangedDate        = changed_date;
       LocalCreatedBy     = local_created_by;
       LocalCreatedAt     = local_created_at;
-      LastChangeDat      = last_changed_at;
+      LastChangedAt      = last_changed_at;
     }
 
 

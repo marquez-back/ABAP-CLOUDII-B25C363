@@ -3,6 +3,7 @@
 @Metadata.ignorePropagatedAnnotations: true
 @ObjectModel.dataCategory: #VALUE_HELP
 @ObjectModel.representativeKey: 'StatusCode'
+
 @ObjectModel.usageType.serviceQuality: #A
 @ObjectModel.usageType.sizeCategory: #S
 @ObjectModel.usageType.dataClass: #CUSTOMIZING
@@ -11,10 +12,12 @@
 define view entity zddf_status_ymp
   as select from zdt_status_ymp
 {
-      @ObjectModel.text.element:['StatusDescription']
-  key status_code        as StatusCode,
+
       @Search.defaultSearchElement: true
       @Search.fuzzinessThreshold: 0.8
-      @Semantics.text:true
+      @ObjectModel.text.element: ['StatusDescription']
+  key status_code        as StatusCode,
+
+      @Semantics.text: true
       status_description as StatusDescription
 }

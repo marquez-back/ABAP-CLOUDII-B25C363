@@ -1,4 +1,4 @@
- @Metadata.layer: #CUSTOMER
+@Metadata.layer: #CUSTOMER
 
 @UI: { headerInfo: {    typeName: 'Incident',
                         typeNamePlural: 'Incidents',
@@ -20,41 +20,23 @@ annotate entity ZDDF_INCIDENT_C_YMP with
   @UI: {    lineItem: [{    position: 10,
                             importance: #MEDIUM,
                             label: 'Incident ID' },
-                            
+
                             {  type: #FOR_ACTION,
-                               dataAction: 'changueStatus',
+                               dataAction: 'changeStatus',
                                label: 'Changue Status',
-                               position: 10}/*,
+                               invocationGrouping: #CHANGE_SET,
+                               position: 20}
 
-                            {  type: #FOR_ACTION,
-                               dataAction: 'create',
-                               label: 'Create',
-                               position: 20},
-
-                            {  type: #FOR_ACTION,
-                               dataAction: 'delete',
-                               label: 'Delete',
-                               position: 30}*/],
-                               
+                           ],
 
                                selectionField: [{ position: 10 }],
-                               identification: [{ position: 10,
+                               identification: [{ position: 20,
                                                     label: 'Incident ID'},
-                               
                                                    {  type: #FOR_ACTION,
-                                                       dataAction: 'changueStatus',
+                                                       dataAction: 'changeStatus',
                                                        label: 'Changue Status',
-                                                       position: 10}/*,
-
-                                                    {  type: #FOR_ACTION,
-                                                       dataAction: 'create',
-                                                       label: 'Create',
-                                                       position: 20},
-
-                                                    {  type: #FOR_ACTION,
-                                                       dataAction: 'delete',
-                                                       label: 'Delete',
-                                                       position:30}*/],
+                                                       invocationGrouping: #CHANGE_SET,
+                                                       position: 30}],
                                                        // Acciones a nivel de línea
                                                     dataPoint: {
                                                       title: 'Incident ID'
@@ -64,13 +46,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
 
   IncidentId;
 
-  /*@UI: {lineItem: [{ position: 30,
-               importance: #LOW ,
-               label: 'Title'}],
-  identification: [{ position: 30  } ] }*/
-  //  selectionField: [{ position: 30 }]
-  //  @UI.hidden: true
-  //Title - Campo obligatorio
+
   @UI: {
     lineItem: [{
       position: 20,

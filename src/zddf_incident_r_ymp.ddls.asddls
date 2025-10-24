@@ -7,6 +7,7 @@
     sizeCategory: #S,
     dataClass: #MIXED
 }
+ 
 define root view entity ZDDF_INCIDENT_R_YMP
   as select from zdt_inct_a_ymp
 
@@ -18,7 +19,7 @@ define root view entity ZDDF_INCIDENT_R_YMP
       incident_id           as IncidentId,
       title                 as Title,
       description           as Description,
-      status                as Status,
+      status                as Status,     
       priority              as Priority,
       creation_date         as CreationDate,
       changed_date          as ChangedDate,

@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PUBLIC SECTION.
 
@@ -6,9 +14,10 @@ CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
                  in_progress TYPE zde_status_code VALUE 'IP',
                  pending     TYPE zde_status_code VALUE 'PE',
                  completed   TYPE zde_status_code VALUE 'CO',
-                 closed      TYPE zde_status_code VALUE 'CL',
+
                  canceled    TYPE zde_status_code VALUE 'CN',
                END OF inc_status.
+
   PRIVATE SECTION.
 
     METHODS get_instance_features FOR INSTANCE FEATURES
@@ -22,6 +31,8 @@ CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS changeStatus FOR MODIFY
       IMPORTING keys FOR ACTION Incident~changeStatus RESULT result.
+
+
 
     METHODS setHistory FOR MODIFY
       IMPORTING keys FOR ACTION Incident~setHistory.
@@ -56,7 +67,53 @@ CLASS lhc_Incident IMPLEMENTATION.
   METHOD get_global_authorizations.
   ENDMETHOD.
 
-  METHOD changeStatus.
+  METHOD changeStatus .
+    DATA: lt_updated_root_entity TYPE TABLE FOR UPDATE zddf_incident_r_ymp,
+          lt_association_entity  TYPE TABLE FOR CREATE zddf_incident_r_ymp\_History,
+          lv_status              TYPE zde_status_code_ymp,
+**          lv_text                TYPE zde_text,
+          lv_exception           TYPE string,
+          lv_error               TYPE c,
+          ls_incident_history    TYPE zdt_inct_h_ymp,
+**          lv_max_his_id          TYPE zde_his_id,
+          lv_wrong_status        TYPE zde_status_code_ymp.
+
+    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+        ENTITY Incident
+          ALL FIELDS WITH CORRESPONDING #( keys )
+                  RESULT DATA(lt_incidents)
+    FAILED failed.
+
+    LOOP AT lt_incidents ASSIGNING FIELD-SYMBOL(<incident>).
+      lv_status = keys[ KEY id %tky = <incident>-%tky ]-%param-NewStatus.
+
+    ENDLOOP.
+*    LOOP AT lt_incidents INTO DATA(ls_incident).
+*
+*      MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+*        ENTITY Incident
+*          UPDATE FIELDS ( Status )
+*          WITH VALUE #(
+*            ( %tky        = ls_incident-%tky
+*              Status       = 'PE'
+*              ChangedDate  = cl_abap_context_info=>get_system_date( ) )
+*          ).
+*
+*    ENDLOOP.
+
+    " --- Crear registro de historial ---
+*  MODIFY ENTITIES OF zddf_incident_his_ymp IN LOCAL MODE
+*    ENTITY History
+*      CREATE
+*      FIELDS ( IncUuid PreviousStatus NewStatus Text )
+*      WITH VALUE #(
+*        ( IncUuid        = ls_incident-IncUuid
+*          PreviousStatus = ls_incident-Status
+*          NewStatus      = parameters-NewStatus
+*          Text           = parameters-Observation )
+*      ).
+
+    result = VALUE #( FOR incident IN lt_incidents ( %tky = incident-%tky ) ).
 
   ENDMETHOD.
 
@@ -95,13 +152,15 @@ CLASS lhc_Incident IMPLEMENTATION.
       UPDATE
       FIELDS ( IncidentId
                CreationDate
-               Status )
+               Status
+               Priority )
       WITH VALUE #(  FOR incident IN incidents ( %tky = incident-%tky
                                                  IncidentId = lv_max_inct_id
                                                  CreationDate = cl_abap_context_info=>get_system_date( )
-                                                 Status       = inc_status-open )  ).
+                                                 Status = 'OP'
+                                                 Priority = 'H' )  ).
 
-    ENDMETHOD.
+  ENDMETHOD.
 
   METHOD CreateHistoryEntry.
   ENDMETHOD.

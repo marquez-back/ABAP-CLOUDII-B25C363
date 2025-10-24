@@ -6,7 +6,7 @@
     <DDLNAME>ZI_CHANGUE_STATUS_YMP</DDLNAME>
     <DDLANGUAGE>E</DDLANGUAGE>
     <DDTEXT>Change Status Parameters</DDTEXT>
-    <SOURCE_TYPE>W</SOURCE_TYPE>
+    <SOURCE_TYPE>A</SOURCE_TYPE>
    </DDLS>
   </asx:values>
  </asx:abap>
