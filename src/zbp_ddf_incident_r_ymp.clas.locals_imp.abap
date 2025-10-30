@@ -71,11 +71,11 @@ CLASS lhc_Incident IMPLEMENTATION.
     DATA: lt_updated_root_entity TYPE TABLE FOR UPDATE zddf_incident_r_ymp,
           lt_association_entity  TYPE TABLE FOR CREATE zddf_incident_r_ymp\_History,
           lv_status              TYPE zde_status_code_ymp,
-**          lv_text                TYPE zde_text,
+          lv_text                TYPE string,
           lv_exception           TYPE string,
           lv_error               TYPE c,
           ls_incident_history    TYPE zdt_inct_h_ymp,
-**          lv_max_his_id          TYPE zde_his_id,
+          lv_max_his_id          TYPE zde_his_id,
           lv_wrong_status        TYPE zde_status_code_ymp.
 
     READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
@@ -86,34 +86,82 @@ CLASS lhc_Incident IMPLEMENTATION.
 
     LOOP AT lt_incidents ASSIGNING FIELD-SYMBOL(<incident>).
       lv_status = keys[ KEY id %tky = <incident>-%tky ]-%param-NewStatus.
+      lv_text = keys[ KEY id %tky = <incident>-%tky ]-%param-Observation.
+
+
+
+
+      MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+        ENTITY Incident
+        UPDATE FIELDS ( Status
+                        ChangedDate )
+         WITH VALUE #(
+           ( %tky        = <incident>-%tky
+             Status       = lv_status
+             ChangedDate  = cl_abap_context_info=>get_system_date( ) )
+         ).
+
+        IF lv_max_his_id IS INITIAL.
+                ls_incident_history-his_id = 1.
+      ELSE.
+        ls_incident_history-his_id = lv_max_his_id + 1.
+      ENDIF.
+
+      ls_incident_history-new_status = lv_status.
+      ls_incident_history-text = lv_text.
+
+      TRY.
+          ls_incident_history-inc_uuid = cl_system_uuid=>create_uuid_x16_static( ).
+        CATCH cx_uuid_error INTO DATA(lo_error).
+          lv_exception = lo_error->get_text(  ).
+      ENDTRY.
+
+      IF ls_incident_history-his_id IS NOT INITIAL.
+*
+        APPEND VALUE #( %tky = <incident>-%tky
+                       %target = VALUE #( (  HisUUID = ls_incident_history-inc_uuid
+                                             IncUUID = <incident>-IncUuid
+                                             HisID = ls_incident_history-his_id
+                                             PreviousStatus = <incident>-Status
+                                             NewStatus = ls_incident_history-new_status
+                                             Text = ls_incident_history-text ) )
+                                              ) TO lt_association_entity.
+      ENDIF.
+
+
+*        MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+*        ENTITY Incident
+*        CREATE BY \_History
+*          FIELDS ( HisUuid IncUuid HisId PreviousStatus NewStatus Text )
+*          WITH VALUE #(
+*            (
+*                     = cl_system_uuid=>create_uuid_x16( )
+*              IncUuid        = <incident>-IncUuid
+*              HisId          = '00000001'
+*              PreviousStatus = <incident>-Status
+*              NewStatus      = parameters-NewStatus
+*              Text           = parameters-Observation
+*            )
+*          ).
 
     ENDLOOP.
-*    LOOP AT lt_incidents INTO DATA(ls_incident).
-*
-*      MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-*        ENTITY Incident
-*          UPDATE FIELDS ( Status )
-*          WITH VALUE #(
-*            ( %tky        = ls_incident-%tky
-*              Status       = 'PE'
-*              ChangedDate  = cl_abap_context_info=>get_system_date( ) )
-*          ).
-*
-*    ENDLOOP.
 
-    " --- Crear registro de historial ---
-*  MODIFY ENTITIES OF zddf_incident_his_ymp IN LOCAL MODE
-*    ENTITY History
-*      CREATE
-*      FIELDS ( IncUuid PreviousStatus NewStatus Text )
-*      WITH VALUE #(
-*        ( IncUuid        = ls_incident-IncUuid
-*          PreviousStatus = ls_incident-Status
-*          NewStatus      = parameters-NewStatus
-*          Text           = parameters-Observation )
-*      ).
+    MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+     ENTITY Incident
+     CREATE BY \_History FIELDS ( HisUUID
+                                  IncUUID
+                                  HisID
+                                  PreviousStatus
+                                  NewStatus
+                                  Text )
+        AUTO FILL CID
+        WITH lt_association_entity
+     MAPPED mapped
+     FAILED failed
+     REPORTED reported.
 
-    result = VALUE #( FOR incident IN lt_incidents ( %tky = incident-%tky ) ).
+    result = VALUE #( FOR incident IN lt_incidents ( %tky = incident-%tky
+                                                  %param = incident ) ).
 
   ENDMETHOD.
 

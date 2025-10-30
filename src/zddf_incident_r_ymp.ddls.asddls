@@ -16,7 +16,7 @@ define root view entity ZDDF_INCIDENT_R_YMP
   association [0..1] to zdt_priority_ymp      as _Priority on $projection.Priority = _Priority.priority_code
 {
    key inc_uuid             as IncUuid,
-      incident_id           as IncidentId,
+      incident_id           as IncidentId,      
       title                 as Title,
       description           as Description,
       status                as Status,     

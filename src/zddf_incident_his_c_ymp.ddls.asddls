@@ -5,8 +5,8 @@
 define view entity ZDDF_INCIDENT_HIS_C_YMP
   as projection on ZDDF_INCIDENT_HIS_YMP
 {
-  key HisUUID,
-  key IncUUID,
+  key HisUuid,
+  key IncUuid,
       HisId,
       PreviousStatus,
       NewStatus,

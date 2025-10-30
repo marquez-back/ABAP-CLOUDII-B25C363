@@ -86,14 +86,13 @@ etag master local_last_changed_at
   delete;
 
   association _Incident { with draft; }
-  //association _Incident;
 
-  field ( numbering : managed )
-  HisUUID;
+  field (numbering : managed)
+  HisUuid;
 
-  field ( readonly )
-  HisUUID,
-  IncUUID,
+  field (readonly)
+  HisUuid,
+  IncUuid,
   local_created_by,
   local_created_at,
   local_last_changed_by,
@@ -101,17 +100,17 @@ etag master local_last_changed_at
   last_changed_at;
 
   mapping for zdt_inct_h_ymp
-    {
-      HisUuid               = his_uuid;
-      IncUuid               = inc_uuid;
-      HisId                 = his_id;
-      PreviousStatus        = previous_status;
-      NewStatus             = new_status;
-      Text                  = text;
-      local_created_by      = local_created_by;
-      local_created_at      = local_created_at;
-      local_last_changed_by = local_last_changed_by;
-      local_last_changed_at = local_last_changed_at;
-      last_changed_at       = last_changed_at;
-    }
+  {
+    HisUuid               = his_uuid;
+    IncUuid               = inc_uuid;
+    HisId                 = his_id;
+    PreviousStatus        = previous_status;
+    NewStatus             = new_status;
+    Text                  = text;
+    local_created_by      = local_created_by;
+    local_created_at      = local_created_at;
+    local_last_changed_by = local_last_changed_by;
+    local_last_changed_at = local_last_changed_at;
+    last_changed_at       = last_changed_at;
+  }
 }
