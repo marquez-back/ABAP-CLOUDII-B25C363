@@ -1,5 +1,6 @@
 @EndUserText.label: 'Service Definition Incident'
 define service ZSD_INCIDENT_YMP {
-  expose ZDDF_INCIDENT_C_YMP as Incident;
-  expose zddf_status_ymp     as StatusVH;
+  expose ZDDF_INCIDENT_C_YMP     as Incident;
+  expose zddf_status_ymp         as StatusVH;
+  expose ZDDF_INCIDENT_HIS_C_YMP as history;
 }

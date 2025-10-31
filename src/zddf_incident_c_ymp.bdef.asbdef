@@ -8,7 +8,7 @@ define behavior for ZDDF_INCIDENT_C_YMP alias Incident
   use update;
   use delete;
 
-  //use association _History;// { with draft; }
+
   use action ValidatePriorityId;
   use action ValidateStatusId;
   use action changeStatus;

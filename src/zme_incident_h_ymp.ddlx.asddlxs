@@ -6,8 +6,9 @@
                                        label: 'History',
                                        value: 'HisID' } },
        presentationVariant: [{ sortOrder: [{ by: 'NewStatus',
-                                          direction: #DESC } ],                                          
-       visualizations: [{ type: #AS_LINEITEM}]}] }
+                                          direction: #DESC } ],
+       visualizations: [{ type: #AS_LINEITEM}]}]
+    }
 annotate entity ZDDF_INCIDENT_HIS_C_YMP with
 {
   @UI.facet: [ { id:              'History',
@@ -18,33 +19,62 @@ annotate entity ZDDF_INCIDENT_HIS_C_YMP with
   @UI: { lineItem:       [ { position: 10, importance: #HIGH } ],
          identification: [ { position: 10 } ] }
   @UI.hidden:true
-  HisUUID;
-  @UI: { lineItem:       [ { position: 20, importance: #HIGH} ],
-         identification: [ { position: 20 } ] }
+  HisUuid;
+  @UI: { lineItem:       [ {    position: 20,
+                                label: 'Incident ID',
+                                importance: #HIGH} ],
+         identification: [ {    position: 20,
+                                label: 'Incident ID' } ] }
   @UI.hidden: true
-  IncUUID;
-  @UI: { lineItem:       [ { position: 30, importance: #HIGH } ],
-         identification: [ { position: 30 } ] }
+  IncUuid;
+  @UI: { lineItem:       [ {    position: 30,
+                                label: 'History Id',
+                                importance: #HIGH } ],
+         identification: [ {    position: 30,
+                                label: 'History Id'
+                                } ] }
   HisId;
-  @UI: { lineItem:       [ { position: 40, importance: #MEDIUM } ],
-         identification: [ { position: 40 } ] }
+  
+  @Consumption.valueHelpDefinition: [ {
+    entity.name: 'zddf_status_ymp',
+    entity.element: 'StatusCode',
+    useForValidation: true
+  } ]
+  @UI: { lineItem:       [ {    position: 40,
+                                label: 'Previous Status',
+                                importance: #MEDIUM } ],
+         identification: [ {    position: 40,
+                                label: 'Previous Status' } ] }
   PreviousStatus;
-  @UI: { lineItem:       [ { position: 50, importance: #LOW } ],
-         identification: [ { position: 50 } ] }
+  @Consumption.valueHelpDefinition: [ {
+    entity.name: 'zddf_status_ymp',
+    entity.element: 'StatusCode',
+    useForValidation: true
+  } ]
+  @UI: { lineItem:       [ {    position: 50, 
+                                label: 'New Status',
+                                importance: #LOW } ],
+         identification: [ {    position: 50,
+                                label: 'New Status' } ] }
   NewStatus;
-  @UI: { lineItem:       [ { position: 60, importance: #LOW } ],
-         identification: [ { position: 60 } ] }
+  @UI: { lineItem:       [ {    position: 60, 
+                                label: 'Observation Change',
+                                importance: #LOW } ],
+         identification: [ {    position: 60,
+                                label: 'Observation Change' } ] }
   Text;
   @UI.hidden:true
   local_created_by;
   @UI.hidden:true
   local_created_at;
-  @UI.hidden:true
-  local_last_changed_by;
-  @UI.hidden:true
-  local_last_changed_at;
-  @UI.hidden:true
-  last_changed_at;
-  @UI.hidden: true
+//  @UI.hidden:true
+//  local_last_changed_by;
+//  @UI.hidden:true
+//  local_last_changed_at;
+//  @UI.hidden:true
+//  last_changed_at;
+   @UI: {
+    lineItem: [ { position: 10, label: 'Historial' } ]
+  } 
   _Incident;
 }

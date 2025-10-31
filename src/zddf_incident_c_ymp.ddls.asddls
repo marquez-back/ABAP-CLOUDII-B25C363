@@ -1,9 +1,9 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Incident Comsumption Entity'
+@EndUserText.label: 'Incident Consumption Entity'
 @Metadata.ignorePropagatedAnnotations: true
-
-@Search.searchable: true
 @Metadata.allowExtensions: true
+@Search.searchable: true
+
 
 define root view entity ZDDF_INCIDENT_C_YMP
   provider contract transactional_query
@@ -17,19 +17,13 @@ define root view entity ZDDF_INCIDENT_C_YMP
       @Search.ranking: #MEDIUM    
       Title,
       Description,
-      
-      
+            
       @Search.defaultSearchElement: true
       @Search.fuzzinessThreshold: 0.8  
       @Search.ranking: #MEDIUM   
       @ObjectModel.text.element: [ 'status_description' ] 
       Status,
-      _Status.status_description,
-      
-      /* Elemento virtual para la edad del ticket
-      @EndUserText.label: 'Egae Incident'     
-      @ObjectModel.virtualElementCalculatedBy: 'ABAP:ZCL_AGE_CALCULATOR_YP'
-      virtual IncidentAge: abap.int4,  */
+      _Status.status_description,             
       
       @Search.defaultSearchElement: true
       @Search.fuzzinessThreshold: 0.8  
@@ -48,9 +42,9 @@ define root view entity ZDDF_INCIDENT_C_YMP
       /* Associations */
      
       _Priority,
-      _Status
+      _Status,
       
-       //@ObjectModel.association.type: [#TO_COMPOSITION_CHILD]
-      //_History //: redirected to composition child ZDDF_INCIDENT_HIS_C_YMP
+       
+      _History : redirected to composition child ZDDF_INCIDENT_HIS_C_YMP
 
 }

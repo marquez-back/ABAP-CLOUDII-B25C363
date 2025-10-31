@@ -11,6 +11,8 @@ define view entity ZDDF_INCIDENT_HIS_YMP
   as select from zdt_inct_h_ymp
  association to parent ZDDF_INCIDENT_R_YMP as _Incident 
     on $projection.IncUuid = _Incident.IncUuid
+  
+     
 
 {
   key    his_uuid        as HisUuid,
@@ -25,4 +27,5 @@ define view entity ZDDF_INCIDENT_HIS_YMP
          local_last_changed_at,
          last_changed_at,
          _Incident
+         
 }

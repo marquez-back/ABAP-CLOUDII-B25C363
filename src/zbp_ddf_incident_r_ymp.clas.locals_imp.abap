@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PUBLIC SECTION.
 
@@ -75,7 +67,7 @@ CLASS lhc_Incident IMPLEMENTATION.
           lv_exception           TYPE string,
           lv_error               TYPE c,
           ls_incident_history    TYPE zdt_inct_h_ymp,
-          lv_max_his_id          TYPE zde_his_id,
+*          lv_max_his_id          TYPE zde_his_id,
           lv_wrong_status        TYPE zde_status_code_ymp.
 
     READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
@@ -101,7 +93,12 @@ CLASS lhc_Incident IMPLEMENTATION.
              ChangedDate  = cl_abap_context_info=>get_system_date( ) )
          ).
 
-        IF lv_max_his_id IS INITIAL.
+      SELECT FROM zdt_inct_h_ymp
+      FIELDS MAX( his_id ) AS max_inct_id
+      WHERE inc_uuid IS NOT NULL
+      INTO @DATA(lv_max_his_id).
+
+      IF lv_max_his_id IS INITIAL.
                 ls_incident_history-his_id = 1.
       ELSE.
         ls_incident_history-his_id = lv_max_his_id + 1.
@@ -117,7 +114,7 @@ CLASS lhc_Incident IMPLEMENTATION.
       ENDTRY.
 
       IF ls_incident_history-his_id IS NOT INITIAL.
-*
+
         APPEND VALUE #( %tky = <incident>-%tky
                        %target = VALUE #( (  HisUUID = ls_incident_history-inc_uuid
                                              IncUUID = <incident>-IncUuid
@@ -127,22 +124,6 @@ CLASS lhc_Incident IMPLEMENTATION.
                                              Text = ls_incident_history-text ) )
                                               ) TO lt_association_entity.
       ENDIF.
-
-
-*        MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-*        ENTITY Incident
-*        CREATE BY \_History
-*          FIELDS ( HisUuid IncUuid HisId PreviousStatus NewStatus Text )
-*          WITH VALUE #(
-*            (
-*                     = cl_system_uuid=>create_uuid_x16( )
-*              IncUuid        = <incident>-IncUuid
-*              HisId          = '00000001'
-*              PreviousStatus = <incident>-Status
-*              NewStatus      = parameters-NewStatus
-*              Text           = parameters-Observation
-*            )
-*          ).
 
     ENDLOOP.
 

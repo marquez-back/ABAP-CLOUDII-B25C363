@@ -3,18 +3,38 @@
 @UI: { headerInfo: {    typeName: 'Incident',
                         typeNamePlural: 'Incidents',
                         title: {    type: #STANDARD,
-                                    value: 'IncidentId' } } ,
+                                    value: 'IncidentId' 
+                                },
+                        description:{   type: #STANDARD, 
+                                        value: 'Title'}
+                     } ,
+                        
        presentationVariant: [{ sortOrder: [{    by: 'IncidentId',
-                                                direction: #ASC }] }]
-                                    }
+                                                direction: #ASC 
+                                           }] 
+                              }]
+                              
+   
+    
+      }
+                                    
+                                    
 annotate entity ZDDF_INCIDENT_C_YMP with
 {
   @UI.facet: [{   id: 'IncidentMasterData',
                   purpose: #STANDARD,
                   type: #IDENTIFICATION_REFERENCE,
                   label: 'Incident Master data',
-                  position:  10 }]
-  @UI.hidden: true
+                  position:  10 },
+    {
+      id: 'IncidentHistory',
+      purpose: #STANDARD,
+      type: #LINEITEM_REFERENCE,
+      label: 'Incident History',
+      targetElement: '_History',
+      position: 20
+    }]
+//  @UI.hidden: true
   IncUuid;
 
   @UI: {    lineItem: [{    position: 10,
@@ -154,8 +174,10 @@ annotate entity ZDDF_INCIDENT_C_YMP with
 
   @UI.hidden: true
   LastChangedAt;
-
-  @UI.hidden: true
-  _history;
+  
+  @UI: {
+    lineItem: [ { position: 10, label: 'Historial' } ]
+  } 
+  _History;
 
 }
