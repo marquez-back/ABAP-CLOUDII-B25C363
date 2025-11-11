@@ -95,11 +95,11 @@ CLASS lhc_Incident IMPLEMENTATION.
 
       SELECT FROM zdt_inct_h_ymp
       FIELDS MAX( his_id ) AS max_inct_id
-      WHERE inc_uuid IS NOT NULL
+      WHERE inc_uuid EQ @<incident>-IncUuid AND inc_uuid IS NOT NULL
       INTO @DATA(lv_max_his_id).
 
       IF lv_max_his_id IS INITIAL.
-                ls_incident_history-his_id = 1.
+        ls_incident_history-his_id = 1.
       ELSE.
         ls_incident_history-his_id = lv_max_his_id + 1.
       ENDIF.
@@ -116,8 +116,8 @@ CLASS lhc_Incident IMPLEMENTATION.
       IF ls_incident_history-his_id IS NOT INITIAL.
 
         APPEND VALUE #( %tky = <incident>-%tky
-                       %target = VALUE #( (  HisUUID = ls_incident_history-inc_uuid
-                                             IncUUID = <incident>-IncUuid
+                       %target = VALUE #( (  HisUuid = ls_incident_history-inc_uuid
+                                             IncUuid = <incident>-IncUuid
                                              HisID = ls_incident_history-his_id
                                              PreviousStatus = <incident>-Status
                                              NewStatus = ls_incident_history-new_status
@@ -129,8 +129,8 @@ CLASS lhc_Incident IMPLEMENTATION.
 
     MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
      ENTITY Incident
-     CREATE BY \_History FIELDS ( HisUUID
-                                  IncUUID
+     CREATE BY \_History FIELDS ( HisUuid
+                                  IncUuid
                                   HisID
                                   PreviousStatus
                                   NewStatus
@@ -192,6 +192,71 @@ CLASS lhc_Incident IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD CreateHistoryEntry.
+    DATA: lt_updated_root_entity TYPE TABLE FOR UPDATE zddf_incident_r_ymp,
+          lt_association_entity  TYPE TABLE FOR CREATE zddf_incident_r_ymp\_History,
+          lv_exception           TYPE string,
+          ls_incident_history    TYPE zdt_inct_h_ymp,
+          lv_status              TYPE zde_status_code_ymp,
+          lv_text                TYPE string,
+*          lv_exception           TYPE string,
+          lv_error               TYPE c.
+
+    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+          ENTITY Incident
+          ALL FIELDS WITH CORRESPONDING #( keys )
+          RESULT DATA(incidents).
+
+    LOOP AT incidents ASSIGNING FIELD-SYMBOL(<incident>).
+      SELECT FROM zdt_inct_h_ymp
+     FIELDS MAX( his_id ) AS max_inct_id
+     WHERE inc_uuid EQ @<incident>-IncUuid AND
+            his_uuid IS NOT NULL
+     INTO @DATA(lv_max_his_id).
+
+      IF lv_max_his_id IS INITIAL.
+        ls_incident_history-his_id = 1.
+      ELSE.
+        ls_incident_history-his_id = lv_max_his_id + 1.
+      ENDIF.
+
+      ls_incident_history-new_status = lv_status.
+      ls_incident_history-text = lv_text.
+
+      TRY.
+          ls_incident_history-inc_uuid = cl_system_uuid=>create_uuid_x16_static( ).
+        CATCH cx_uuid_error INTO DATA(lo_error).
+          lv_exception = lo_error->get_text(  ).
+      ENDTRY.
+
+      IF ls_incident_history-his_id IS NOT INITIAL.
+
+        APPEND VALUE #( %tky = <incident>-%tky
+                       %target = VALUE #( (  HisUuid = ls_incident_history-inc_uuid
+                                             IncUuid = <incident>-IncUuid
+                                             HisID = ls_incident_history-his_id
+                                             PreviousStatus = <incident>-Status
+                                             NewStatus = ls_incident_history-new_status
+                                             Text = 'First Incident'  ) )
+                                              ) TO lt_association_entity.
+      ENDIF.
+
+    ENDLOOP.
+
+    MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+     ENTITY Incident
+     CREATE BY \_History FIELDS ( HisUuid
+                                  IncUuid
+                                  HisID
+                                  PreviousStatus
+                                  NewStatus
+                                  Text )
+        AUTO FILL CID
+        WITH lt_association_entity.
+
+
+*    result = VALUE #( FOR incident IN lt_incidents ( %tky = incident-%tky
+*                                                  %param = incident ) ).
+
   ENDMETHOD.
 
   METHOD ValidateDates.

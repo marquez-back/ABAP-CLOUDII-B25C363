@@ -26,43 +26,41 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                   type: #IDENTIFICATION_REFERENCE,
                   label: 'Incident Master data',
                   position:  10 },
-    {
-      id: 'IncidentHistory',
-      purpose: #STANDARD,
-      type: #LINEITEM_REFERENCE,
-      label: 'Incident History',
-      targetElement: '_History',
-      position: 20
-    }]
-//  @UI.hidden: true
+                {
+                  id: 'IncidentHistory',
+                  purpose: #STANDARD,
+                  type: #LINEITEM_REFERENCE,
+                  label: 'Incident History',
+                  targetElement: '_History',
+                  position: 20
+            }]
   IncUuid;
 
   @UI: {    lineItem: [{    position: 10,
                             importance: #MEDIUM,
                             label: 'Incident ID' },
 
+                        {  type: #FOR_ACTION,
+                           dataAction: 'changeStatus',
+                           label: 'Changue Status',
+                           invocationGrouping: #CHANGE_SET,
+                           position: 20}
+
+                        ],
+
+            selectionField: [{ position: 10 }],
+            identification: [{ position: 20,
+                               label: 'Incident ID'},
                             {  type: #FOR_ACTION,
                                dataAction: 'changeStatus',
                                label: 'Changue Status',
                                invocationGrouping: #CHANGE_SET,
-                               position: 20}
-
-                           ],
-
-                               selectionField: [{ position: 10 }],
-                               identification: [{ position: 20,
-                                                    label: 'Incident ID'},
-                                                   {  type: #FOR_ACTION,
-                                                       dataAction: 'changeStatus',
-                                                       label: 'Changue Status',
-                                                       invocationGrouping: #CHANGE_SET,
-                                                       position: 30}],
-                                                       // Acciones a nivel de línea
-                                                    dataPoint: {
-                                                      title: 'Incident ID'
-                                                    }
-
-  }
+                               position: 30}],
+                                                   
+            dataPoint: {
+              title: 'Incident ID'
+            }
+    }
 
   IncidentId;
 
