@@ -33,7 +33,7 @@ authorization master ( global, instance )
   determine action ValidatePriorityId { validation ValidatePriority; }
   determine action ValidateStatusId { validation ValidateStatus; }
 
-  action changeStatus  parameter ZI_CHANGUE_STATUS_YMP  result [1] $self;
+  action changeStatus  parameter ZI_CHANGUE_STATUS_YMP  result [1] $self ;
 
 //  side effects { action changeStatus affects $self, entity _History; }
 //  side effects {action changeStatus affects  $self;}

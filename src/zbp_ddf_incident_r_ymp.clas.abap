@@ -22,7 +22,10 @@ CLASS zbp_ddf_incident_r_ymp DEFINITION
           VALUE(rv_result) TYPE zde_status_description_ymp.
 ENDCLASS.
 
-CLASS zbp_ddf_incident_r_ymp IMPLEMENTATION.
+
+
+CLASS ZBP_DDF_INCIDENT_R_YMP IMPLEMENTATION.
+
 
   METHOD _validate_status.
     " Cargar valores de estado válidos si no están en memoria
@@ -35,6 +38,7 @@ CLASS zbp_ddf_incident_r_ymp IMPLEMENTATION.
       WITH KEY StatusCode = iv_status.
 
   ENDMETHOD.
+
 
   METHOD _get_status_description.
     " Cargar valores de estado si no están en memoria
@@ -51,5 +55,4 @@ CLASS zbp_ddf_incident_r_ymp IMPLEMENTATION.
       rv_result = |Estado desconocido ({ iv_status })|.
     ENDIF.
   ENDMETHOD.
-
 ENDCLASS.

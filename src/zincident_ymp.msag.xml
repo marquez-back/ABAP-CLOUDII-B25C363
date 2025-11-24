@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZINCIDENT_YMP</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>MSG ERROR</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZINCIDENT_YMP</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Status &amp;1 cannot be changed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZINCIDENT_YMP</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Cannot change status from &amp;1 to &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZINCIDENT_YMP</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Observation is mandatory for status &amp;1</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZINCIDENT_YMP</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Invalid status transition from &amp;1 to &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZINCIDENT_YMP</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Status &amp;1 is final. No further changes allowed</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

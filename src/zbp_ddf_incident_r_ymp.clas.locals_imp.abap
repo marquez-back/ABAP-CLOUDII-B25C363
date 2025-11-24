@@ -6,7 +6,7 @@ CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
                  in_progress TYPE zde_status_code VALUE 'IP',
                  pending     TYPE zde_status_code VALUE 'PE',
                  completed   TYPE zde_status_code VALUE 'CO',
-
+                 closed      TYPE zde_status_code VALUE 'CL',
                  canceled    TYPE zde_status_code VALUE 'CN',
                END OF inc_status.
 
@@ -22,7 +22,8 @@ CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING REQUEST requested_authorizations FOR Incident RESULT result.
 
     METHODS changeStatus FOR MODIFY
-      IMPORTING keys FOR ACTION Incident~changeStatus RESULT result.
+      IMPORTING keys   FOR ACTION Incident~changeStatus
+      RESULT    result.
 
 
 
@@ -58,18 +59,52 @@ CLASS lhc_Incident IMPLEMENTATION.
 
   METHOD get_global_authorizations.
   ENDMETHOD.
-
+**  change status incident
   METHOD changeStatus .
-    DATA: lt_updated_root_entity TYPE TABLE FOR UPDATE zddf_incident_r_ymp,
-          lt_association_entity  TYPE TABLE FOR CREATE zddf_incident_r_ymp\_History,
-          lv_status              TYPE zde_status_code_ymp,
-          lv_text                TYPE string,
-          lv_exception           TYPE string,
-          lv_error               TYPE c,
-          ls_incident_history    TYPE zdt_inct_h_ymp,
-*          lv_max_his_id          TYPE zde_his_id,
-          lv_wrong_status        TYPE zde_status_code_ymp.
+    DATA: lt_association      TYPE TABLE FOR CREATE zddf_incident_r_ymp\_History,
+          lv_new_status       TYPE zde_status_code_ymp,
+          lv_prev_status      TYPE zde_status_code_ymp,
+          ls_params           TYPE zi_changue_status_ymp,
+          lv_text             TYPE string,
+          lv_exception        TYPE string,
+          lv_error            TYPE c,
+          ls_incident_history TYPE zdt_inct_h_ymp,
+          lv_wrong_status     TYPE zde_status_code_ymp.
 
+
+
+    ls_params = keys[ 1 ]-%param.
+    IF ls_params-NewStatus IS INITIAL.
+      APPEND VALUE #(
+          %tky = keys[ 1 ]-%tky
+          %msg = new_message(
+                    id       = 'ZINCIDENT'
+                    number   = '001'
+                    v1       = 'New Status is required'
+                    severity = if_abap_behv_message=>severity-error )
+
+      ) TO reported-incident.
+
+      failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
+      RETURN.
+    ENDIF.
+
+    IF ls_params-Observation IS INITIAL.
+      APPEND VALUE #(
+           %tky = keys[ 1 ]-%tky
+           %msg = new_message(
+                     id       = 'ZINCIDENT'
+                     number   = '002'
+                     v1       = 'Observation is required'
+                     severity = if_abap_behv_message=>severity-error )
+
+       ) TO reported-incident.
+
+      failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
+      RETURN.
+    ENDIF.
+
+*    Se extraen los datos del incidente y se guardan en lt_incidents
     READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
         ENTITY Incident
           ALL FIELDS WITH CORRESPONDING #( keys )
@@ -77,10 +112,47 @@ CLASS lhc_Incident IMPLEMENTATION.
     FAILED failed.
 
     LOOP AT lt_incidents ASSIGNING FIELD-SYMBOL(<incident>).
-      lv_status = keys[ KEY id %tky = <incident>-%tky ]-%param-NewStatus.
+      lv_prev_status = <incident>-Status.
+      lv_new_status  = keys[ KEY id %tky = <incident>-%tky ]-%param-NewStatus.
       lv_text = keys[ KEY id %tky = <incident>-%tky ]-%param-Observation.
 
 
+
+      IF lv_prev_status EQ inc_status-pending AND lv_new_status  EQ inc_status-closed OR
+         lv_prev_status EQ inc_status-pending AND lv_new_status  EQ inc_status-completed.
+
+        APPEND VALUE #(
+                  %tky = keys[ 1 ]-%tky
+                  %msg = new_message(
+                            id       = 'ZINCIDENT'
+                            number   = '003'
+                            v1       = 'No se puede cambiar un incidente a (CO) o (CL) si aún está en (PE).'
+                            severity = if_abap_behv_message=>severity-error )
+
+              ) TO reported-incident.
+
+        failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
+        RETURN.
+
+      ENDIF.
+
+       IF lv_prev_status EQ inc_status-closed OR lv_prev_status EQ inc_status-canceled
+            OR lv_prev_status  EQ inc_status-completed.
+
+        APPEND VALUE #(
+                  %tky = keys[ 1 ]-%tky
+                  %msg = new_message(
+                            id       = 'ZINCIDENT'
+                            number   = '004'
+                            v1       = 'Ya no es posible cambiar el estatus'
+                            severity = if_abap_behv_message=>severity-error )
+
+              ) TO reported-incident.
+
+        failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
+        RETURN.
+
+      ENDIF.
 
 
       MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
@@ -89,7 +161,7 @@ CLASS lhc_Incident IMPLEMENTATION.
                         ChangedDate )
          WITH VALUE #(
            ( %tky        = <incident>-%tky
-             Status       = lv_status
+             Status       = lv_new_status
              ChangedDate  = cl_abap_context_info=>get_system_date( ) )
          ).
 
@@ -104,7 +176,7 @@ CLASS lhc_Incident IMPLEMENTATION.
         ls_incident_history-his_id = lv_max_his_id + 1.
       ENDIF.
 
-      ls_incident_history-new_status = lv_status.
+      ls_incident_history-new_status = lv_new_status.
       ls_incident_history-text = lv_text.
 
       TRY.
@@ -122,7 +194,7 @@ CLASS lhc_Incident IMPLEMENTATION.
                                              PreviousStatus = <incident>-Status
                                              NewStatus = ls_incident_history-new_status
                                              Text = ls_incident_history-text ) )
-                                              ) TO lt_association_entity.
+                                              ) TO lt_association.
       ENDIF.
 
     ENDLOOP.
@@ -136,7 +208,7 @@ CLASS lhc_Incident IMPLEMENTATION.
                                   NewStatus
                                   Text )
         AUTO FILL CID
-        WITH lt_association_entity
+        WITH lt_association
      MAPPED mapped
      FAILED failed
      REPORTED reported.
@@ -266,6 +338,12 @@ CLASS lhc_Incident IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD ValidateStatus.
+    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+         ENTITY Incident
+           ALL FIELDS WITH CORRESPONDING #( keys )
+                   RESULT DATA(lt_incidents).
+
+
   ENDMETHOD.
 
 ENDCLASS.

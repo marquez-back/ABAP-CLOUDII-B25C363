@@ -9,7 +9,10 @@ CLASS zcl_load_initial_data_ymp DEFINITION
   PRIVATE SECTION.
 ENDCLASS.
 
-CLASS zcl_load_initial_data_ymp IMPLEMENTATION.
+
+
+CLASS ZCL_LOAD_INITIAL_DATA_YMP IMPLEMENTATION.
+
 
   METHOD if_oo_adt_classrun~main.
     " Eliminar datos existentes
@@ -28,5 +31,4 @@ CLASS zcl_load_initial_data_ymp IMPLEMENTATION.
     COMMIT WORK.
     out->write( 'Tabla ZDT_PRIORITY_USER poblada exitosamente.' ).
   ENDMETHOD.
-
 ENDCLASS.

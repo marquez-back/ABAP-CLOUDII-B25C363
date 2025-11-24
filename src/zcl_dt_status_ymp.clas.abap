@@ -9,7 +9,10 @@ CLASS zcl_dt_status_ymp DEFINITION
   PRIVATE SECTION.
 ENDCLASS.
 
-CLASS zcl_dt_status_ymp IMPLEMENTATION.
+
+
+CLASS ZCL_DT_STATUS_YMP IMPLEMENTATION.
+
 
   METHOD if_oo_adt_classrun~main.
     " Eliminar datos existentes
@@ -31,5 +34,4 @@ CLASS zcl_dt_status_ymp IMPLEMENTATION.
     COMMIT WORK.
     out->write( 'Tabla ZDT_STATUS_USER poblada exitosamente.' ).
   ENDMETHOD.
-
 ENDCLASS.

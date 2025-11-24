@@ -1,0 +1,20 @@
+CLASS zcl_incident_message_ymp DEFINITION
+  PUBLIC
+  INHERITING FROM cx_static_check
+  FINAL
+  CREATE PUBLIC.
+
+  PUBLIC SECTION.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+CLASS zcl_incident_message_ymp IMPLEMENTATION.
+
+
+
+ENDCLASS.
+
+
