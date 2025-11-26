@@ -17,15 +17,16 @@ authorization master ( global, instance )
 
   association _History { create ( features : instance ); with draft; }//
   field ( numbering : managed, readonly ) IncUuid;
-  field ( mandatory ) Title, Description,Priority;
+  field ( mandatory ) Title, Description, Priority;
   field ( readonly ) IncidentId, LocalCreatedBy, LocalCreatedAt, Status;
-  field ( readonly ) LocalLastChangedBy,LocalLastChangedAt,LastChangedAt,CreationDate,ChangedDate;
+  field ( readonly ) LocalLastChangedBy, LocalLastChangedAt, LastChangedAt, CreationDate, ChangedDate;
 
 
 
   validation ValidateStatus on save { create; field Status; }
   validation ValidatePriority on save { create; field Priority; }
   validation ValidateDates on save { create; field CreationDate, ChangedDate; }
+  validation ValidateMandatoryFields on save { create; field Title, Description, Priority; }
 
   determination SetInitialValues on modify { create; }
   determination CreateHistoryEntry on save { create; }
@@ -33,11 +34,10 @@ authorization master ( global, instance )
   determine action ValidatePriorityId { validation ValidatePriority; }
   determine action ValidateStatusId { validation ValidateStatus; }
 
-  action changeStatus  parameter ZI_CHANGUE_STATUS_YMP  result [1] $self ;
+    //Modal Change Status
+  action changeStatus parameter ZI_CHANGUE_STATUS_YMP result [1] $self;
 
-//  side effects { action changeStatus affects $self, entity _History; }
-//  side effects {action changeStatus affects  $self;}
-internal action setHistory;
+  internal action setHistory;
 
   draft action Activate optimized;
   draft action Discard;
@@ -50,11 +50,11 @@ internal action setHistory;
     validation ValidateStatus;
     validation ValidatePriority;
     validation ValidateDates;
+    validation ValidateMandatoryFields;
   }
 
   mapping for zdt_inct_a_ymp
     {
-
       IncUuid            = inc_uuid;
       IncidentId         = incident_id;
       Title              = title;
@@ -89,10 +89,10 @@ etag master local_last_changed_at
 
   association _Incident { with draft; }
 
-  field (numbering : managed)
+  field ( numbering : managed )
   HisUuid;
 
-  field (readonly)
+  field ( readonly )
   HisUuid,
   IncUuid,
   local_created_by,
@@ -102,17 +102,17 @@ etag master local_last_changed_at
   last_changed_at;
 
   mapping for zdt_inct_h_ymp
-  {
-    HisUuid               = his_uuid;
-    IncUuid               = inc_uuid;
-    HisId                 = his_id;
-    PreviousStatus        = previous_status;
-    NewStatus             = new_status;
-    Text                  = text;
-    local_created_by      = local_created_by;
-    local_created_at      = local_created_at;
-    local_last_changed_by = local_last_changed_by;
-    local_last_changed_at = local_last_changed_at;
-    last_changed_at       = last_changed_at;
-  }
+    {
+      HisUuid               = his_uuid;
+      IncUuid               = inc_uuid;
+      HisId                 = his_id;
+      PreviousStatus        = previous_status;
+      NewStatus             = new_status;
+      Text                  = text;
+      local_created_by      = local_created_by;
+      local_created_at      = local_created_at;
+      local_last_changed_by = local_last_changed_by;
+      local_last_changed_at = local_last_changed_at;
+      last_changed_at       = last_changed_at;
+    }
 }

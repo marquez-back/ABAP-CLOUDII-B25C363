@@ -1,7 +1,7 @@
 @EndUserText.label: 'Parameter structure changeStatus action'
 define abstract entity ZI_CHANGUE_STATUS_YMP
 {
- @EndUserText.label: 'Nuevo Estado' 
+ @EndUserText.label: 'New Status' 
   @Consumption.valueHelpDefinition: [ 
     {
      entity: { name: 'zddf_status_ymp', element: 'StatusCode' } 
@@ -10,7 +10,7 @@ define abstract entity ZI_CHANGUE_STATUS_YMP
 
   NewStatus   : zde_status_code_ymp;
   
-  @EndUserText.label: 'Comentario'
+  @EndUserText.label: 'Observation'
   Observation  : abap.char(80);
   
   

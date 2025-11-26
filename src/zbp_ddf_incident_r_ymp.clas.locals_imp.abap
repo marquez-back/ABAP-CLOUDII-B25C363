@@ -45,6 +45,9 @@ CLASS lhc_Incident DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS ValidateStatus FOR VALIDATE ON SAVE
       IMPORTING keys FOR Incident~ValidateStatus.
 
+     METHODS validateMandatoryFields FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Incident~validateMandatoryFields.
+
 
 
 ENDCLASS.
@@ -52,6 +55,7 @@ ENDCLASS.
 CLASS lhc_Incident IMPLEMENTATION.
 
   METHOD get_instance_features.
+
   ENDMETHOD.
 
   METHOD get_instance_authorizations.
@@ -72,39 +76,7 @@ CLASS lhc_Incident IMPLEMENTATION.
           lv_wrong_status     TYPE zde_status_code_ymp.
 
 
-
-    ls_params = keys[ 1 ]-%param.
-    IF ls_params-NewStatus IS INITIAL.
-      APPEND VALUE #(
-          %tky = keys[ 1 ]-%tky
-          %msg = new_message(
-                    id       = 'ZINCIDENT'
-                    number   = '001'
-                    v1       = 'New Status is required'
-                    severity = if_abap_behv_message=>severity-error )
-
-      ) TO reported-incident.
-
-      failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
-      RETURN.
-    ENDIF.
-
-    IF ls_params-Observation IS INITIAL.
-      APPEND VALUE #(
-           %tky = keys[ 1 ]-%tky
-           %msg = new_message(
-                     id       = 'ZINCIDENT'
-                     number   = '002'
-                     v1       = 'Observation is required'
-                     severity = if_abap_behv_message=>severity-error )
-
-       ) TO reported-incident.
-
-      failed-incident = VALUE #( ( %tky = keys[ 1 ]-%tky ) ).
-      RETURN.
-    ENDIF.
-
-*    Se extraen los datos del incidente y se guardan en lt_incidents
+*    The incident data is extracted and saved in lt_incidents
     READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
         ENTITY Incident
           ALL FIELDS WITH CORRESPONDING #( keys )
@@ -112,12 +84,43 @@ CLASS lhc_Incident IMPLEMENTATION.
     FAILED failed.
 
     LOOP AT lt_incidents ASSIGNING FIELD-SYMBOL(<incident>).
+
       lv_prev_status = <incident>-Status.
       lv_new_status  = keys[ KEY id %tky = <incident>-%tky ]-%param-NewStatus.
       lv_text = keys[ KEY id %tky = <incident>-%tky ]-%param-Observation.
 
+      IF lv_new_status IS INITIAL.
+        APPEND VALUE #(
+            %tky = keys[ KEY id %tky = <incident>-%tky ]-%tky
+            %msg = new_message(
+                      id       = 'ZINCIDENT'
+                      number   = '001'
+                      v1       = 'New Status is required'
+                      severity = if_abap_behv_message=>severity-error )
 
+        ) TO reported-incident.
 
+        failed-incident = VALUE #( ( %tky = keys[ KEY id %tky = <incident>-%tky ]-%tky ) ).
+        RETURN.
+      ENDIF.
+
+**  Validate data Observation
+      IF lv_text IS INITIAL.
+        APPEND VALUE #(
+             %tky = keys[ KEY id %tky = <incident>-%tky ]-%tky
+             %msg = new_message(
+                       id       = 'ZINCIDENT'
+                       number   = '002'
+                       v1       = 'Observation is required'
+                       severity = if_abap_behv_message=>severity-error )
+
+         ) TO reported-incident.
+
+        failed-incident = VALUE #( ( %tky = keys[ KEY id %tky = <incident>-%tky ]-%tky ) ).
+        RETURN.
+      ENDIF.
+
+**  Validate status  change from (PE) to (CO) or (CL)
       IF lv_prev_status EQ inc_status-pending AND lv_new_status  EQ inc_status-closed OR
          lv_prev_status EQ inc_status-pending AND lv_new_status  EQ inc_status-completed.
 
@@ -126,7 +129,7 @@ CLASS lhc_Incident IMPLEMENTATION.
                   %msg = new_message(
                             id       = 'ZINCIDENT'
                             number   = '003'
-                            v1       = 'No se puede cambiar un incidente a (CO) o (CL) si aún está en (PE).'
+                            v1       = 'Status cannot change from (PE) to (CO) or (CL)'
                             severity = if_abap_behv_message=>severity-error )
 
               ) TO reported-incident.
@@ -135,16 +138,16 @@ CLASS lhc_Incident IMPLEMENTATION.
         RETURN.
 
       ENDIF.
-
-       IF lv_prev_status EQ inc_status-closed OR lv_prev_status EQ inc_status-canceled
-            OR lv_prev_status  EQ inc_status-completed.
+**  Blocked status (CN, CO, CL)
+      IF lv_prev_status EQ inc_status-closed OR lv_prev_status EQ inc_status-canceled
+           OR lv_prev_status  EQ inc_status-completed.
 
         APPEND VALUE #(
                   %tky = keys[ 1 ]-%tky
                   %msg = new_message(
                             id       = 'ZINCIDENT'
                             number   = '004'
-                            v1       = 'Ya no es posible cambiar el estatus'
+                            v1       = |Status "{ lv_prev_status }" can no longer be changed|
                             severity = if_abap_behv_message=>severity-error )
 
               ) TO reported-incident.
@@ -154,7 +157,7 @@ CLASS lhc_Incident IMPLEMENTATION.
 
       ENDIF.
 
-
+**Update the status and date of change of the incident in the root table.
       MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
         ENTITY Incident
         UPDATE FIELDS ( Status
@@ -165,11 +168,13 @@ CLASS lhc_Incident IMPLEMENTATION.
              ChangedDate  = cl_abap_context_info=>get_system_date( ) )
          ).
 
+**Bring the maximum history ID for the consecutive
       SELECT FROM zdt_inct_h_ymp
       FIELDS MAX( his_id ) AS max_inct_id
       WHERE inc_uuid EQ @<incident>-IncUuid AND inc_uuid IS NOT NULL
       INTO @DATA(lv_max_his_id).
 
+**Valid if there is a previous history to add 1 to the ID; otherwise, it assigns 1.
       IF lv_max_his_id IS INITIAL.
         ls_incident_history-his_id = 1.
       ELSE.
@@ -179,6 +184,7 @@ CLASS lhc_Incident IMPLEMENTATION.
       ls_incident_history-new_status = lv_new_status.
       ls_incident_history-text = lv_text.
 
+**Generates an X16 version UUID that SAP uses as a unique identifier for the history table (HisUUID)
       TRY.
           ls_incident_history-inc_uuid = cl_system_uuid=>create_uuid_x16_static( ).
         CATCH cx_uuid_error INTO DATA(lo_error).
@@ -186,7 +192,7 @@ CLASS lhc_Incident IMPLEMENTATION.
       ENDTRY.
 
       IF ls_incident_history-his_id IS NOT INITIAL.
-
+**Create a record in History
         APPEND VALUE #( %tky = <incident>-%tky
                        %target = VALUE #( (  HisUuid = ls_incident_history-inc_uuid
                                              IncUuid = <incident>-IncUuid
@@ -198,7 +204,7 @@ CLASS lhc_Incident IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
-
+**Inserting data into the historical record
     MODIFY ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
      ENTITY Incident
      CREATE BY \_History FIELDS ( HisUuid
@@ -213,6 +219,7 @@ CLASS lhc_Incident IMPLEMENTATION.
      FAILED failed
      REPORTED reported.
 
+**Return result UI
     result = VALUE #( FOR incident IN lt_incidents ( %tky = incident-%tky
                                                   %param = incident ) ).
 
@@ -223,14 +230,14 @@ CLASS lhc_Incident IMPLEMENTATION.
 
   METHOD SetInitialValues.
 
-** Read root entity entries
+**Read root entity entries
     READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
      ENTITY Incident
      FIELDS ( CreationDate
               Status ) WITH CORRESPONDING #( keys )
      RESULT DATA(incidents).
 
-** This important for logic
+**This important for logic
     DELETE incidents WHERE CreationDate IS NOT INITIAL.
 
     CHECK incidents IS NOT INITIAL.
@@ -337,11 +344,67 @@ CLASS lhc_Incident IMPLEMENTATION.
   METHOD ValidatePriority.
   ENDMETHOD.
 
+  METHOD validateMandatoryFields.
+
+    LOOP AT keys ASSIGNING FIELD-SYMBOL(<fs_key>).
+
+      READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
+        ENTITY Incident
+        FIELDS ( Title Description Priority )
+        WITH CORRESPONDING #( keys )
+        RESULT DATA(lt_data).
+
+      LOOP AT lt_data ASSIGNING FIELD-SYMBOL(<row>).
+
+** Validate title
+        IF <row>-Title IS INITIAL.
+          APPEND VALUE #(
+              %tky = <fs_key>-%tky
+              %msg = new_message(
+                        id       = 'ZINCIDENT'
+                        number   = '010'
+                        v1       = 'Title is required'
+                        severity = if_abap_behv_message=>severity-error )
+          ) TO reported-incident.
+
+          failed-incident = VALUE #( ( %tky = <fs_key>-%tky ) ).
+        ENDIF.
+
+** Validate description
+        IF <row>-Description IS INITIAL.
+          APPEND VALUE #(
+              %tky = <fs_key>-%tky
+              %msg = new_message(
+                        id       = 'ZINCIDENT'
+                        number   = '011'
+                        v1       = 'Description is required'
+                        severity = if_abap_behv_message=>severity-error )
+          ) TO reported-incident.
+
+          failed-incident = VALUE #( ( %tky = <fs_key>-%tky ) ).
+        ENDIF.
+
+** Validate Priority
+        IF <row>-Priority IS INITIAL.
+          APPEND VALUE #(
+              %tky = <fs_key>-%tky
+              %msg = new_message(
+                        id       = 'ZINCIDENT'
+                        number   = '012'
+                        v1       = 'Priority is required'
+                        severity = if_abap_behv_message=>severity-error )
+          ) TO reported-incident.
+
+          failed-incident = VALUE #( ( %tky = <fs_key>-%tky ) ).
+        ENDIF.
+
+      ENDLOOP.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD ValidateStatus.
-    READ ENTITIES OF zddf_incident_r_ymp IN LOCAL MODE
-         ENTITY Incident
-           ALL FIELDS WITH CORRESPONDING #( keys )
-                   RESULT DATA(lt_incidents).
 
 
   ENDMETHOD.

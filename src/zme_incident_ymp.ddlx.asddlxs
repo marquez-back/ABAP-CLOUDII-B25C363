@@ -21,6 +21,7 @@
                                     
 annotate entity ZDDF_INCIDENT_C_YMP with
 {
+
   @UI.facet: [{   id: 'IncidentMasterData',
                   purpose: #STANDARD,
                   type: #IDENTIFICATION_REFERENCE,
@@ -42,7 +43,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
 
                         {  type: #FOR_ACTION,
                            dataAction: 'changeStatus',
-                           label: 'Changue Status',
+                           label: 'Change Status',
                            invocationGrouping: #CHANGE_SET,
                            position: 20}
 
@@ -53,7 +54,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
                                label: 'Incident ID'},
                             {  type: #FOR_ACTION,
                                dataAction: 'changeStatus',
-                               label: 'Changue Status',
+                               label: 'Change Status',
                                invocationGrouping: #CHANGE_SET,
                                position: 30}],
                                                    
@@ -176,6 +177,7 @@ annotate entity ZDDF_INCIDENT_C_YMP with
   @UI: {
     lineItem: [ { position: 10, label: 'Historial' } ]
   } 
-  _History;
+  _History;  
+ 
 
 }
